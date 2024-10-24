@@ -32,6 +32,7 @@ class StepsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->columns([
+                TextColumn::make('id')->label('Communication Order')->alignCenter(),
                 Tables\Columns\TextColumn::make('description'),
                 TextColumn::make('created_at'),
                 TextColumn::make('updated_at')

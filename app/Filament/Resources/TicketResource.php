@@ -29,7 +29,7 @@ class TicketResource extends Resource
         return $form
             ->schema([
                 TextInput::make('title'),
-                TextInput::make('phone') ->tel()->rules('integer'),
+                TextInput::make('number')->numeric()->maxLength(11),
                 TextInput::make('name'),
                 TextInput::make('email'),
                 MarkdownEditor::make('description'),
@@ -43,8 +43,8 @@ class TicketResource extends Resource
             ->columns([
                 TextColumn::make('title')->label('Titlte'),
                 TextColumn::make('name')->label('Name'),
-                TextColumn::make('phone')->label('Phone'),
-                TextColumn::MAKE('description')->label('Ticket Description'),
+                TextColumn::make('number')->label('Phone'),
+                TextColumn::make('description')->label('Ticket Description')->limit(20),
                 TextColumn::make('user.name')->label('Helpdesk Member'),
                 
             ])
