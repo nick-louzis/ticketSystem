@@ -19,13 +19,15 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+
+    protected static ?string $navigationGroup = "Ticket";
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('title')
+                TextInput::make('title')->label("Τίτλος")->required(),
             ]);
     }
 
@@ -33,7 +35,7 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')
+                TextColumn::make('title')->label("Τίτλος")
             ])
             ->filters([
                 //

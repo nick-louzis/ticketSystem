@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
-    protected $fillable = ['title', 'name', 'email', 'number','description', 'user_id', 'status', 'category_id'];
+    protected $fillable = ['title', 'name', 'email', 'number','description', 'user_id', 'status', 'category_id', 'endDate'];
 
     protected $casts =[
         'step_id' => 'array',
