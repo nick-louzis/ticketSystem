@@ -11,9 +11,13 @@ class EditTicket extends EditRecord
     protected static string $resource = TicketResource::class;
 
     protected function getHeaderActions(): array
-    {
+    {   
+        if(auth()->user()->isAdmin=== 1) {
         return [
             Actions\DeleteAction::make(),
         ];
-    }
+    } else{
+        return[];
+    };
+}
 }

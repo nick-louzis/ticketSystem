@@ -12,8 +12,12 @@ class EditCategory extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        if(auth()->user()->isAdmin=== 1) {
+            return [
+                Actions\DeleteAction::make(),
+            ];
+        } else{
+            return[];
+        };
     }
 }
