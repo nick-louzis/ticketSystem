@@ -4,8 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketResource\Pages;
 use App\Filament\Resources\TicketResource\RelationManagers;
+use App\Filament\Resources\TicketResource\RelationManagers\CivilsRelationManager;
 use App\Filament\Resources\TicketResource\RelationManagers\StepsRelationManager;
+use App\Models\Civil;
 use App\Models\Ticket;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MarkdownEditor;
@@ -60,25 +63,70 @@ class TicketResource extends Resource
                 Section::make('Προσθέστε Πολίτη')
                     ->description('Πρσοσθέστε τα στοιχεία επικοινωνίας του πολίτη')
                     ->schema([
+                       
+                        Select::make('email')->required()->searchable()
+                        ->getSearchResultsUsing(fn (string $query) => Civil::where('email', 'like', "%{$query}%")
+                            ->pluck('email', 'id'))
+                        ->getOptionLabelUsing(fn ($value) => Civil::find($value)?->email)
+                        ->createOptionUsing(function ($data) {
+                            // Create a new Civil record with provided data
+                            return Civil::create([
+                                'email' => $data['email'],
+                                'name' => $data['name'] ?? null,
+                                'number' => $data['number'] ?? null,
+                                'ticket_id' => $data['id']?? null,
+                            ])->id; // Return the ID of the newly created Civil
+                        })
+                        ->createOptionForm([
+                            TextInput::make('name')->required()->label('Name'),
+                            TextInput::make('email')->email()->required()->label('Email')->unique(Civil::class, 'email'),
+                            TextInput::make('number')->label('Phone Number')
+                    
+                        ])->reactive() // Make the select field reactive
+                        ->afterStateUpdated(function (callable $set, $state) {
+                            // Fetch the user by ID when selected and set other fields
+                            $civil = Civil::find($state);
+                            if ($civil) {
+                                $set('name', $civil->name);
+                                $set('number', $civil->number);
+                                $set('civil_id', $civil->id);
+                            } else {
+                                $set('name', null);
+                                $set('number', null);
+                                $set('civil_id', null);
+                            }
+                        }),
+        
                         TextInput::make('name')->label("Ονοματεπώνυμο")->required(),
-                        TextInput::make('phone')->label("Τηλέφωνο") ->tel()->rules('integer')->required(),
-                        TextInput::make('email')->required(),
+                        TextInput::make('number')->label("Τηλέφωνο") ->tel()->rules('integer')->required(),
                     ])->collapsible()->columnSpan(1),
 
-            ])->columns(3);
+            ])
+            ->beforeSave(
+                function($record) {
+                    Debugbar::info($record);
+                    // degug($record);
+                    // $civil = Civil::find($record->civil_id);
+                    // logger()->info('A new ticket has been created', $civil);
+                }
+            )->columns(3);
     }
 
+
+    
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('title')->label('Τίτλος'),
                 TextColumn::make('name')->label('Name'),
-                TextColumn::make('phone')->label('Phone'),
+                TextColumn::make('number')->label('Phone'),
                 TextColumn::MAKE('description')->label('Περιγραφή'),
                 TextColumn::make('user.name')->label('Διαχειριστής'),
                 TextColumn::make('category.title')->label('Κατηγορία')->sortable()->searchable(),
-
+                TextColumn::make('civil.name')->label('Civil Name'),
+                TextColumn::make('civil.email')->label('Civil Email'),
+                TextColumn::make('civil.number')->label('Phone Number'),
             
       
                 
@@ -99,7 +147,8 @@ class TicketResource extends Resource
     public static function getRelations(): array
     {
         return [
-            StepsRelationManager::class
+            StepsRelationManager::class,
+            // CivilsRelationManager::class
         ];
     }
 

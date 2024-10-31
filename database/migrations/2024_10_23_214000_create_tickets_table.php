@@ -20,9 +20,11 @@ return new class extends Migration
             $table->integer('number')->nullable();
             $table->text('description');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('ticket_id')->nullable()->constrained('tickets', 'id')->cascadeOnDelete();
+            $table->foreignId('civil_id')->nullable()->constrained('users')->cascadeOnDelete();
+            // $table->foreignId('ticket_id')->nullable()->constrained('tickets', 'id')->cascadeOnDelete();
             $table->foreignId('category_id')->nullable();
             $table->enum('status',['pending', 'closed', 'in progress'])->default('pending');
+            
         });
     }
 
