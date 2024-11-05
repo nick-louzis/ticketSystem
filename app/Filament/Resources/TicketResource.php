@@ -5,8 +5,11 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TicketResource\Pages;
 use App\Filament\Resources\TicketResource\RelationManagers;
 use App\Filament\Resources\TicketResource\RelationManagers\StepsRelationManager;
+use App\Models\Category;
 use App\Models\Ticket;
+use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\RichEditor;
@@ -18,9 +21,11 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use PhpParser\Node\Stmt\Label;
 
 
 
@@ -40,19 +45,19 @@ class TicketResource extends Resource
                     ->description('Πρσοσθέστε τις απαραίτητες λεπτομέρειες σχετικά με το νέο Ticket')
                     ->schema([
                         TextInput::make('title')->label("Τίτλος")->required(),
-                        Select::make('category_id')->label('Κατηγορία')->relationship('category', 'title')->searchable()->preload()->required(),
+                        Select::make('category_id')->label('Κατηγορία')->relationship('category', 'title')->searchable()->preload()->required()->placeholder("Παρακαλώ επιλέξτε"),
                         
-                        DateTimePicker::make('created_at')->label('Ημερομηνία Δημιουργίας'),
-                        DateTimePicker::make('endDate')->label('Ημερομηνία Ολοκλήρωσης'),
+                        DatePicker::make('created_at')->label('Ημερομηνία Δημιουργίας'),
+                        DatePicker::make('endDate')->label('Ημερομηνία Ολοκλήρωσης'),
                         ToggleButtons::make('status')->label('Κατάσταση')->required()
                                         ->options([
-                                            'pending' => 'Υπο εξέταση',
+                                            'pending' => 'Υπό εξέταση',
                                             'in progress' => 'Υπό επίλυση',
                                             'closed' => 'Επιλήθηκε'
                                         ])->default("pending")
                                         ->icons([
-                                            'pending' => 'heroicon-o-pencil',
-                                            'in progress' => 'heroicon-o-clock',
+                                            'pending' => 'heroicon-o-clock',
+                                            'in progress' => 'heroicon-o-arrow-path',
                                             'closed' => 'heroicon-o-check-circle',
                                         ])->inline()->columnSpanFull(),
                         MarkdownEditor::make('description')->label("Περιγραφή")->required()->columnSpanFull(),
@@ -61,7 +66,7 @@ class TicketResource extends Resource
                     ->description('Πρσοσθέστε τα στοιχεία επικοινωνίας του πολίτη')
                     ->schema([
                         TextInput::make('name')->label("Ονοματεπώνυμο")->required(),
-                        TextInput::make('phone')->label("Τηλέφωνο") ->tel()->rules('integer')->required(),
+                        TextInput::make('number')->label("Τηλέφωνο") ->tel()->rules('integer')->required(),
                         TextInput::make('email')->required(),
                     ])->collapsible()->columnSpan(1),
 
@@ -72,19 +77,35 @@ class TicketResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')->label('Τίτλος'),
-                TextColumn::make('name')->label('Name'),
-                TextColumn::make('phone')->label('Phone'),
-                TextColumn::MAKE('description')->label('Περιγραφή'),
-                TextColumn::make('user.name')->label('Διαχειριστής'),
-                TextColumn::make('category.title')->label('Κατηγορία')->sortable()->searchable(),
+                TextColumn::make('title')->label('Τίτλος')->searchable()->toggleable(),
+                TextColumn::make('category.title')->label('Κατηγορία')->sortable()->searchable()->toggleable(),
+                TextColumn::make('user.name')->label('Διαχειριστής')->sortable()->searchable()->toggleable(),
+                TextColumn::make('created_at')->label('Ημ. Δημιουργίας')->sortable()->toggleable()->date(),
+                TextColumn::make('endDate')->label('Ημ. Ολοκλήρωσης')->sortable()->toggleable()->date(),
+                TextColumn::make('status')->label('Κατάσταση')->sortable()->toggleable()->badge()->searchable()
+                            ->formatStateUsing(function ($state) {
+                                return match ($state) {
+                                    'pending' => 'Υπό εξέταση',
+                                    'in progress' => 'Υπό επίλυση',
+                                    'closed' => 'Επιλήθηκε'
+                                };
+                            })
+                            ->colors([
+                                'primary' => 'in progress',
+                                'success' => 'closed',
+                                'danger' => 'pending',
+                            ])
+                            
+                
 
             
       
                 
             ])
             ->filters([
-                //
+                SelectFilter::make('category_id')->label('Κατηγορία')->relationship('category', 'title')->preload()->multiple(),
+               
+                SelectFilter::make('user.id')->label('Διαχειριστής')->relationship('user', 'name')->preload()->multiple()
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
