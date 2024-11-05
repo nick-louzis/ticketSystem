@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\TicketResource\RelationManagers;
+namespace App\Filament\Resources\CivilResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -10,9 +10,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CivilsRelationManager extends RelationManager
+class TicketsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'civils';
+    protected static string $relationship = 'tickets';
 
     public function form(Form $form): Form
     {
@@ -29,7 +29,7 @@ class CivilsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->columns([
-                Tables\Columns\TextColumn::make('id'),
+                Tables\Columns\TextColumn::make('title'),
             ])
             ->filters([
                 //

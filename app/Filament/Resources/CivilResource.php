@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CivilResource\Pages;
 use App\Filament\Resources\CivilResource\RelationManagers;
+use App\Filament\Resources\CivilResource\RelationManagers\TicketsRelationManager;
 use App\Models\Civil;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
@@ -61,7 +62,7 @@ class CivilResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            TicketsRelationManager::class
         ];
     }
 

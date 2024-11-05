@@ -9,12 +9,10 @@ class Civil extends Model
 {
     protected $fillable = ['name', 'email', 'number'];
 
-    protected $casts =[
-        'ticket_id' => 'array',
-    ];
+    
 
 
     public function tickets(): HasMany{
-        return $this->hasMany(Ticket::class, 'ticket_id');
+        return $this->hasMany(Ticket::class, 'civil_id');
     }
 }

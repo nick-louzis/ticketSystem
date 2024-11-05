@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('civils', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->unsignedBigInteger('number');
-            
+        Schema::table('tickets', function (Blueprint $table) {
+            $table->foreignId('civil_id')->nullable()->constrained('civils')->cascadeOnDelete();
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('civils');
+        Schema::table('tickets', function (Blueprint $table) {
+            //
+        });
     }
 };

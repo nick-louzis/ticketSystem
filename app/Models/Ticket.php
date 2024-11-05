@@ -27,6 +27,6 @@ class Ticket extends Model
       }
 
       public function civils(){
-        return $this->belongsTo(Civil::class);
+        return $this->belongsTo(Civil::class, 'civil_id');
       }
 }

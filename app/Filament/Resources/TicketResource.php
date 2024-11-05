@@ -64,25 +64,10 @@ class TicketResource extends Resource
                     ->description('Πρσοσθέστε τα στοιχεία επικοινωνίας του πολίτη')
                     ->schema([
                        
-                        Select::make('email')->required()->searchable()
-                        ->getSearchResultsUsing(fn (string $query) => Civil::where('email', 'like', "%{$query}%")
-                            ->pluck('email', 'id'))
-                        ->getOptionLabelUsing(fn ($value) => Civil::find($value)?->email)
-                        ->createOptionUsing(function ($data) {
-                            // Create a new Civil record with provided data
-                            return Civil::create([
-                                'email' => $data['email'],
-                                'name' => $data['name'] ?? null,
-                                'number' => $data['number'] ?? null,
-                                'ticket_id' => $data['id']?? null,
-                            ])->id; // Return the ID of the newly created Civil
-                        })
-                        ->createOptionForm([
-                            TextInput::make('name')->required()->label('Name'),
-                            TextInput::make('email')->email()->required()->label('Email')->unique(Civil::class, 'email'),
-                            TextInput::make('number')->label('Phone Number')
-                    
-                        ])->reactive() // Make the select field reactive
+                        Select::make('email')->required()->searchable()->getSearchResultsUsing(fn (string $search): array => Civil::where('email', 'like', "%{$search}%")
+                        ->pluck('email', 'id')->toArray())
+                        ->getOptionLabelUsing(fn ($value): ?string => Civil::find($value)?->email)
+                      ->reactive() // Make the select field reactive
                         ->afterStateUpdated(function (callable $set, $state) {
                             // Fetch the user by ID when selected and set other fields
                             $civil = Civil::find($state);
@@ -95,21 +80,27 @@ class TicketResource extends Resource
                                 $set('number', null);
                                 $set('civil_id', null);
                             }
+                        })  ->createOptionForm([
+                            TextInput::make('email')->email()->required()->label('Email')->unique(Civil::class, 'email'),
+                            TextInput::make('number')->label('Phone Number'),
+                            TextInput::make('name')->required()->label('Name'),
+                    
+                        ])->createOptionUsing(function ($data) {
+                            // Create a new Civil record with provided data
+                            return Civil::create([
+                                'email' => $data['email'],
+                                'name' => $data['name'] ?? null,
+                                'number' => $data['number'] ?? null,
+                                // 'ticket_id' => $data['id']?? null,
+                            ])->id; // Return the ID of the newly created Civil
                         }),
-        
                         TextInput::make('name')->label("Ονοματεπώνυμο")->required(),
                         TextInput::make('number')->label("Τηλέφωνο") ->tel()->rules('integer')->required(),
+                        TextInput::make('civil_id')->readOnly()
                     ])->collapsible()->columnSpan(1),
 
             ])
-            ->beforeSave(
-                function($record) {
-                    Debugbar::info($record);
-                    // degug($record);
-                    // $civil = Civil::find($record->civil_id);
-                    // logger()->info('A new ticket has been created', $civil);
-                }
-            )->columns(3);
+           ->columns(3);
     }
 
 
