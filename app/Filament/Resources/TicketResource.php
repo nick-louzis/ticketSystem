@@ -110,13 +110,13 @@ class TicketResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('title')->label('Τίτλος'),
-                TextColumn::make('name')->label('Name'),
-                TextColumn::make('number')->label('Phone'),
+                TextColumn::make('name')->label('Name')->label('Όνομα Πολίτη'),
+                TextColumn::make('number')->label('Phone')->label('Τηλέφωνο Πολίτη'),
                 TextColumn::MAKE('description')->label('Περιγραφή'),
                 TextColumn::make('user.name')->label('Διαχειριστής'),
                 TextColumn::make('category.title')->label('Κατηγορία')->sortable()->searchable(),
                 TextColumn::make('civil.name')->label('Civil Name'),
-                TextColumn::make('civil.email')->label('Civil Email'),
+                TextColumn::make('email')->label('Email Πολίτη'),
                 TextColumn::make('civil.number')->label('Phone Number'),
             
       

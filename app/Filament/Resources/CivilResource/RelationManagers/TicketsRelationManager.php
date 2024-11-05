@@ -3,12 +3,13 @@
 namespace App\Filament\Resources\CivilResource\RelationManagers;
 
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\RelationManagers\RelationManager;
 
 class TicketsRelationManager extends RelationManager
 {
@@ -30,6 +31,8 @@ class TicketsRelationManager extends RelationManager
             ->recordTitleAttribute('id')
             ->columns([
                 Tables\Columns\TextColumn::make('title'),
+                TextColumn::make('category.title'),
+                TextColumn::make('user.name'),
             ])
             ->filters([
                 //
