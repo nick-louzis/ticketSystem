@@ -64,23 +64,27 @@ class TicketResource extends Resource
                     ->description('Πρσοσθέστε τα στοιχεία επικοινωνίας του πολίτη')
                     ->schema([
                        
-                        Select::make('email')->required()->searchable()->getSearchResultsUsing(fn (string $search): array => Civil::where('email', 'like', "%{$search}%")
+                        Select::make('civil_id')
+                        ->relationship('civil', 'email') //define the function form the ticket class and the attribute i wan to display.
+                        ->required()->searchable()
+                        ->getSearchResultsUsing(fn (string $search): array => Civil::where('email', 'like', "%{$search}%")
                         ->pluck('email', 'id')->toArray())
                         ->getOptionLabelUsing(fn ($value): ?string => Civil::find($value)?->email)
-                      ->reactive() // Make the select field reactive
+                      ->reactive()
+                         // Make the select field reactive
                         ->afterStateUpdated(function (callable $set, $state) {
                             // Fetch the user by ID when selected and set other fields
                             $civil = Civil::find($state);
                             if ($civil) {
                                 $set('name', $civil->name);
                                 $set('number', $civil->number);
-                                $set('civil_id', $civil->id);
+                                $set('email', $civil->email);
                             } else {
                                 $set('name', null);
                                 $set('number', null);
-                                $set('civil_id', null);
+                             
                             }
-                        })  ->createOptionForm([
+                        })->createOptionForm([
                             TextInput::make('email')->email()->required()->label('Email')->unique(Civil::class, 'email'),
                             TextInput::make('number')->label('Phone Number'),
                             TextInput::make('name')->required()->label('Name'),
@@ -94,9 +98,19 @@ class TicketResource extends Resource
                                 // 'ticket_id' => $data['id']?? null,
                             ])->id; // Return the ID of the newly created Civil
                         }),
-                        TextInput::make('name')->label("Ονοματεπώνυμο")->required(),
-                        TextInput::make('number')->label("Τηλέφωνο") ->tel()->rules('integer')->required(),
-                        TextInput::make('civil_id')->readOnly()
+                        TextInput::make('name')->label("Ονοματεπώνυμο")->readOnly()->required()
+                        ->afterStateHydrated(function (callable $set, $record) {
+                            if ($record && $record->civil) {
+                                $set('name', $record->civil->name);
+                            }
+                        }),
+                        TextInput::make('number')->label("Τηλέφωνο")->readOnly()->tel()->rules('integer')->required()
+                        ->afterStateHydrated(function (callable $set, $record) {
+                            if ($record && $record->civil) {
+                                $set('number', $record->civil->number);
+                            }
+                        }),
+                                  
                     ])->collapsible()->columnSpan(1),
 
             ])
@@ -110,23 +124,22 @@ class TicketResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('title')->label('Τίτλος'),
-                TextColumn::make('name')->label('Name')->label('Όνομα Πολίτη'),
-                TextColumn::make('number')->label('Phone')->label('Τηλέφωνο Πολίτη'),
-                TextColumn::MAKE('description')->label('Περιγραφή'),
+                TextColumn::make('description')->label('Περιγραφή'),
                 TextColumn::make('user.name')->label('Διαχειριστής'),
                 TextColumn::make('category.title')->label('Κατηγορία')->sortable()->searchable(),
                 TextColumn::make('civil.name')->label('Civil Name'),
-                TextColumn::make('email')->label('Email Πολίτη'),
+                TextColumn::make('civil.email')->label('Email Πολίτη'),
                 TextColumn::make('civil.number')->label('Phone Number'),
             
       
                 
             ])
             ->filters([
-                //
+                
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

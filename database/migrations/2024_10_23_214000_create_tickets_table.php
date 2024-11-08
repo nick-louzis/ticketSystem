@@ -15,12 +15,8 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('title');
-            $table->string('name');
-            $table->string('email')->nullable();
-            $table->integer('number')->nullable();
             $table->text('description');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-     
             $table->foreignId('category_id')->nullable();
             $table->enum('status',['pending', 'closed', 'in progress'])->default('pending');
             

@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
-    protected $fillable = ['title', 'name', 'email', 'number','description', 'user_id', 'civil_id', 'status', 'category_id', 'endDate'];
+    protected $fillable = ['title','description', 'user_id', 'civil_id', 'status', 'category_id', 'endDate'];
 
-    protected $casts =[
-        'step_id' => 'array',
-    ];
+    // protected $casts =[
+    //     'step_id' => 'array',
+    // ];
 
 
     public function user()
@@ -26,7 +26,7 @@ class Ticket extends Model
         return  $this->belongsTo(Category::class);
       }
 
-      public function civils(){
+      public function civil(){
         return $this->belongsTo(Civil::class, 'civil_id');
       }
 }
